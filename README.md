@@ -12,7 +12,7 @@ A minimalist, real-time collaborative to-do list application powered by Firebase
 
 🚀 Live Demo
 
-🔗 (https://your-netlify-site.netlify.app) 
+🔗 (https://sharedtodolist.netlify.app/)
 
 🛠️ Tech Stack
 
