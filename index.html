@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared To-Do List</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDSaFPAF0GLakmOZf3pttE1IAMUBCvLTvE",
+      authDomain: "collab-todo-list-b18f3.firebaseapp.com",
+      databaseURL: "https://collab-todo-list-b18f3-default-rtdb.firebaseio.com",
+      projectId: "collab-todo-list-b18f3",
+      storageBucket: "collab-todo-list-b18f3.firebasestorage.app",
+      messagingSenderId: "115397030625",
+      appId: "1:115397030625:web:2834600da29986494fbda0",
+      measurementId: "G-5LKWE3CKV6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const listRef = ref(db, 'todos');
+
+    const list = document.getElementById('todo-list');
+
+    function createItem(key, text, checked) {
+      const li = document.createElement('li');
+      li.className = checked ? 'done' : '';
+
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = checked;
+      checkbox.addEventListener('change', () => {
+        update(ref(db, 'todos/' + key), { checked: checkbox.checked });
+      });
+
+      const span = document.createElement('span');
+      span.textContent = text;
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '🗑️';
+      delBtn.className = 'delete';
+      delBtn.onclick = () => remove(ref(db, 'todos/' + key));
+
+      label.appendChild(checkbox);
+      label.appendChild(span);
+      li.appendChild(label);
+      li.appendChild(delBtn);
+      list.appendChild(li);
+    }
+
+    onValue(listRef, snapshot => {
+      list.innerHTML = '';
+      snapshot.forEach(child => {
+        const { text, checked } = child.val();
+        createItem(child.key, text, checked);
+      });
+    });
+
+    window.addItem = function(e) {
+      e.preventDefault();
+      const input = document.getElementById('new-item');
+      const value = input.value.trim();
+      if (!value) return;
+      push(listRef, { text: value, checked: false });
+      input.value = '';
+    };
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    h1 {
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #eaeaea;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    li.done span {
+      text-decoration: line-through;
+      color: gray;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .add-form {
+      display: flex;
+      margin-top: 1rem;
+      gap: 10px;
+    }
+    .add-form input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .add-form button {
+      padding: 10px 15px;
+      border: none;
+      background: #333;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button.delete {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Shared To-Do List</h1>
+    <ul id="todo-list"></ul>
+    <form class="add-form" onsubmit="addItem(event)">
+      <input type="text" id="new-item" placeholder="Add something...">
+      <button type="submit">Add</button>
+    </form>
+  </div>
+</body>
+</html>
